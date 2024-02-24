@@ -21,7 +21,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -54,6 +59,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.ui.Alignment
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -124,7 +130,13 @@ fun DogItem(
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val color by animateColorAsState(targetValue = if (expanded) MaterialTheme.colorScheme.tertiaryContainer
+    else MaterialTheme.colorScheme.primaryContainer,)
     Card(modifier=modifier){
+        Column(modifier=Modifier.animateContentSize(animationSpec =
+        spring(dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMedium))
+            .background(color)){
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -135,9 +147,17 @@ fun DogItem(
         Spacer(modifier=Modifier.weight(1f))
         DogItemButton(
             expanded = expanded,
-            onClick = { /*TODO*/ }
+            onClick = { expanded=!expanded }
         )
-    }}
+    }
+        if(expanded){
+            DogHobby(dogHobby = dog.hobbies,modifier = Modifier.padding(
+                start = dimensionResource(R.dimen.padding_medium),
+                top = dimensionResource(R.dimen.padding_small),
+                end = dimensionResource(R.dimen.padding_medium),
+                bottom = dimensionResource(R.dimen.padding_medium)
+        ))}}
+    }
 }
 
 @Composable
@@ -148,7 +168,7 @@ fun DogItemButton(expanded:Boolean,onClick:()->Unit,modifier: Modifier=Modifier)
         modifier = modifier
     ) {
         Icon(
-            imageVector = Icons.Filled.ExpandMore,
+            imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
             contentDescription = stringResource(R.string.expand_button_content_description),
             tint = MaterialTheme.colorScheme.secondary
         )
